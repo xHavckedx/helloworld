@@ -1,0 +1,85 @@
+pipeline{
+    agent none
+    
+    stages {
+        stage('Get code'){
+            agent any
+            steps{
+                git 'https://github.com/xHavckedx/helloworld'
+                sh 'ls -la'
+                stash includes: 'app/**/*', name: 'app'
+                stash includes: 'test/**/*', name: 'test'
+                stash includes: 'pytest.ini', name: 'pytest.ini'
+            }
+        }
+        stage('Build in Agent1'){
+            agent {
+                label 'ubuntu1'
+            }
+            steps{
+                sh '''
+                    whoami
+                    hostname
+                '''
+                echo 'Eyyy, esto es Python. No hay que compilar nada!!'
+            }
+        }
+        
+        stage('Get python with dependencies and wiremock in Agent2'){
+            agent {
+                label 'ubuntu2'
+            }
+            steps{
+                sh '''
+                    whoami
+                    hostname
+                '''
+                unstash 'app'
+                unstash 'test'
+                unstash 'pytest.ini'
+                sh '''
+                    apt update -y
+                    ls wiremock-standalone-3.5.4.jar || wget https://repo1.maven.org/maven2/org/wiremock/wiremock-standalone/3.5.4/wiremock-standalone-3.5.4.jar || $(apt install wget -y && wget https://repo1.maven.org/maven2/org/wiremock/wiremock-standalone/3.5.4/wiremock-standalone-3.5.4.jar)
+                    python3.11 --version || apt install python3 -y
+                    python3.11 -m pip || curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+                    python3.11 -m flask || python3.11 -m pip install flask
+                    python3.11 -m pytest ||python3.11 -m pip install pytest
+                    '''
+            }
+        }
+        stage('Tests'){
+            parallel{
+                stage('Unit test in Agent2'){
+                    agent {
+                        label 'ubuntu2'
+                    }
+                    steps{
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
+                            sh ''' 
+                                export PYTHONPATH=.
+                                pytest --junitxml=result-unit.xml test/unit
+                            '''
+                        }
+                    }
+                }
+                stage('Rest test in Agent2'){
+                    agent{
+                        label 'ubuntu2'
+                    }
+                    steps{
+                        sh '''
+                        export FLASK_APP=app/api.py
+                        
+                        flask run &
+                        java -jar ./wiremock-standalone-3.5.4.jar  --port 9090 --root-dir ./test/wiremock &
+                        sleep 2
+                        
+                        pytest --junitxml=result-rest.xml test/rest
+                        '''
+                        junit 'result*.xml'
+                    }
+                }
+            }
+        }
+    }
+}
