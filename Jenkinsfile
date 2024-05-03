@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent label: 'ubuntu2'
     
     stages{
         stage('Get Code'){
