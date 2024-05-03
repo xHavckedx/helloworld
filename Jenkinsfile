@@ -5,7 +5,7 @@ pipeline {
         stage('Get Code'){
             steps{
                 // Obtener el código del repo
-                git 'https://github.com/xHavckedx/helloworld'
+                git branch: 'develop', url: 'https://github.com/xHavckedx/helloworld'
             }
         }
         stage('Build'){
