@@ -81,5 +81,21 @@ pipeline{
                 }
             }
         }
+        stage('Clean workspace Agent1') {
+            agent {
+                label 'ubuntu1'
+            }
+            steps {
+                deleteDir()
+            }
+        }
+        stage('Clean workspace Agent2') {
+            agent {
+                label 'ubuntu2'
+            }
+            steps {
+                deleteDir()
+            }
+        }
     }
 }
