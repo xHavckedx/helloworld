@@ -34,7 +34,7 @@ def substract(op_1, op_2):
     
     
 @api_application.route("/calc/multiply/<op_1>/<op_2>", methods=["GET"])
-def substract(op_1, op_2):
+def multiply(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
         return ("{}".format(CALCULATOR.multiply(num_1, num_2)), http.client.OK, HEADERS)
@@ -43,7 +43,7 @@ def substract(op_1, op_2):
 
 
 @api_application.route("/calc/divide/<op_1>/<op_2>", methods=["GET"])
-def substract(op_1, op_2):
+def divide(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
         if num_1 == 0 or num_2 == 0:
