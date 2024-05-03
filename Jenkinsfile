@@ -1,11 +1,13 @@
 pipeline {
-    agent label: 'ubuntu2'
+    agent{
+        label 'linux'
+    } 
     
     stages{
         stage('Get Code'){
             steps{
                 // Obtener el código del repo
-                git branch: 'develop', url: 'https://github.com/xHavckedx/helloworld'
+                git branch: 'feature_fix_racecond', url: 'https://github.com/xHavckedx/helloworld'
             }
         }
         stage('Build'){
