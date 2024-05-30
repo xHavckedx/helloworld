@@ -1,0 +1,47 @@
+version: "3"
+services:
+
+  jenkins:
+    image: jenkins/jenkins:latest
+    ports:
+      - 8085:8080
+      - 5005:5000
+    volumes:
+      - ./jenkinds_data:/var/jenkins_home
+    networks:
+      - unir
+    restart: always
+  
+  ubuntu1:
+    image: leodevops1/unir-helloworld-ubuntu:latest
+    entrypoint: /usr/sbin/sshd -D
+    tty: true
+    networks:
+      - unir
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1' 
+          memory: '1024M'
+        reservations:
+          cpus: '0.25'
+          memory: '256M'
+
+  ubuntu2:
+    image: leodevops1/unir-helloworld-ubuntu:latest
+    entrypoint: /usr/sbin/sshd -D
+    tty: true
+    networks:
+      - unir
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '1024M'
+        reservations:
+          cpus: '0.25'
+          memory: '256M'
+networks:
+  unir:
