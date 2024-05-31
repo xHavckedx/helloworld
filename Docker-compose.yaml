@@ -43,5 +43,22 @@ services:
         reservations:
           cpus: '0.25'
           memory: '256M'
+  
+  ubuntu3:
+    image: leodevops1/unir-helloworld-ubuntu:latest
+    entrypoint: /usr/sbin/sshd -D
+    tty: true
+    networks:
+      - unir
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '1024M'
+        reservations:
+          cpus: '0.25'
+          memory: '256M'
+          
 networks:
   unir:
