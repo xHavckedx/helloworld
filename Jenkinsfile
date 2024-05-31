@@ -149,7 +149,7 @@ pipeline {
                         unstash 'tests'
                         sh '''
                             export PYTHONPATH=.
-                            coverage run --branch --source=app --omit=app/init.py,app/api.py -m pytest test/unit
+                            coverage run --branch --source=app --omit=app/init.py -m pytest test/unit
                             coverage xml -o coverage.xml
                         '''
                         cobertura coberturaReportFile:'coverage.xml', onlyStable: false, conditionalCoverageTargets: '95,90,70', lineCoverageTargets: '95,90,70'
