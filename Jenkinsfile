@@ -41,6 +41,7 @@ pipeline {
                     sleep 4
                     pytest --junitxml=result-rest.xml test/rest
                 '''
+                junit 'result*.xml'
             }
         }
         stage('Static'){
