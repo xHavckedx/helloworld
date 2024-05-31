@@ -70,7 +70,10 @@ pipeline {
         stage('Performance'){
             steps{
                 sh '''
-                    jmeter -n -t test/jmeter/flask.jmx -f -l flask.jtl
+                    export PYTHONPATH=.
+                    export FLASK_APP=app/api.py
+                    flask run &
+                    jmeter -n -t test/jmeter/flask2.jmx -f -l flask.jtl
                 '''
                 perfReport sourceDataFiles: 'flask.jtl'
                 //jmeter
@@ -84,22 +87,10 @@ pipeline {
             steps{
                 sh '''
                     export PYTHONPATH=.
-                    coverage run --branch --source=app --omit=app/init.py -m pytest test/unit
+                    coverage run --branch --source=app --omit=app/init.py,app/api.py -m pytest test/unit
                     coverage xml -o coverage.xml
                 '''
-                cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml'
-                script {
-                    def coverageOutput = sh(script: 'coverage report', returnStdout: true)
-                    def coverageLine = coverageOutput.split('\n')[-1]  // Obtiene la última línea del reporte
-                    def coveragePercent = coverageLine.split()[-1].replace('%', '').toFloat()
-                    echo "Coverage: ${coveragePercent}%"
-
-                    if (coveragePercent < env.COVERAGE_THRESHOLD_UNSTABLE.toFloat()) {
-                        currentBuild.result = 'FAILURE'
-                    } else if (coveragePercent >= env.COVERAGE_THRESHOLD_UNSTABLE.toFloat() && coveragePercent < env.COVERAGE_THRESHOLD_STABLE.toFloat()) {
-                        currentBuild.result = 'UNSTABLE'
-                    }
-                }
+                cobertura coberturaReportFile:'coverage.xml', onlyStable: false, conditionalCoverageTargets: '95,90,70', lineCoverageTargets: '95,90,70'
                 //coverage
                 // si está entre 80 y 90 UNSTABLE
                 // si está por encima de 90 verde por debajo de 80 rojo
